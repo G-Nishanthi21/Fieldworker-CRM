@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance - FieldCRM{% endblock %}
+{% block page_title %}Attendance{% endblock %}
+{% block page_subtitle %}Check-in / check-out{% endblock %}
+
+{% block content %}
+
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body p-4 text-center">
+
+                {% if today_attendance %}
+                    {% if today_attendance.check_out_time %}
+                        <span class="badge bg-secondary fs-6 px-3 py-2 mb-3">
+                            Day Completed — {{ today_attendance.total_hours }} hrs worked
+                        </span>
+                        <br>
+                        <small class="text-muted">
+                            Checked in: {{ today_attendance.check_in_time|time:"h:i A" }} |
+                            Checked out: {{ today_attendance.check_out_time|time:"h:i A" }}
+                        </small>
+                    {% else %}
+                        <span class="badge bg-success fs-6 px-3 py-2 mb-3">
+                            <i class="bi bi-circle-fill" style="font-size:8px;"></i>
+                            On Duty since {{ today_attendance.check_in_time|time:"h:i A" }}
+                        </span>
+                        <br><br>
+                        <a href="{% url 'attendance:check_out' %}" class="btn btn-danger px-4">
+                            <i class="bi bi-box-arrow-right"></i> Check Out
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted mb-3">You haven't checked in today.</p>
+                    <a href="{% url 'attendance:check_in' %}" class="btn btn-success px-4">
+                        <i class="bi bi-box-arrow-in-right"></i> Check In Now
+                    </a>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header border-0 pt-4 pb-0 px-4">
+        <h5 class="fw-700 mb-0">Attendance History</h5>
+    </div>
+    <div class="card-body px-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        {% if user.is_admin or user.is_manager %}<th>Worker</th>{% endif %}
+                        <th>Date</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                        <th>Total Hours</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for att in attendance_list %}
+                    <tr>
+                        {% if user.is_admin or user.is_manager %}
+                            <td>{{ att.worker.get_full_name|default:att.worker.username }}</td>
+                        {% endif %}
+                        <td>{{ att.date }}</td>
+                        <td>{{ att.check_in_time|time:"h:i A" }}</td>
+                        <td>{{ att.check_out_time|time:"h:i A"|default:"—" }}</td>
+                        <td>{{ att.total_hours|default:"—" }}</td>
+                        <td>
+                            {% if att.check_out_time %}
+                                <span class="badge bg-success">Completed</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">In Progress</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No attendance records yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

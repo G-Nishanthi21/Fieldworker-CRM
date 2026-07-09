@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Signup - FieldCRM</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body style="background:#f1f5f9;min-height:100vh;display:flex;align-items:center;justify-content:center;">
+
+<div style="width:100%;max-width:440px;padding:20px;">
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4">
+
+            <!-- Logo -->
+            <div class="text-center mb-4">
+                <div style="width:48px;height:48px;background:#4f46e5;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                    <i class="bi bi-grid-fill text-white" style="font-size:20px;"></i>
+                </div>
+                <h4 style="color:#1e293b;font-weight:700;">Create Customer Account</h4>
+                <p class="text-muted" style="font-size:14px;">Sign up to request field services</p>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-danger py-2" style="font-size:14px;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label fw-600" style="font-size:14px;">Full Name</label>
+                    <input type="text" name="full_name" class="form-control" placeholder="e.g. Nivin Kumar" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-600" style="font-size:14px;">Username</label>
+                    <input type="text" name="username" class="form-control" placeholder="Choose a username" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-600" style="font-size:14px;">Phone Number</label>
+                    <input type="text" name="phone" class="form-control" placeholder="Your contact number">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-600" style="font-size:14px;">Password</label>
+                    <input type="password" name="password1" class="form-control" placeholder="Create a password" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-600" style="font-size:14px;">Confirm Password</label>
+                    <input type="password" name="password2" class="form-control" placeholder="Repeat your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-600">
+                    <i class="bi bi-person-plus"></i> Create Account
+                </button>
+            </form>
+
+            <div class="text-center mt-3">
+                <small class="text-muted">Already have an account?
+                    <a href="{% url 'accounts:login' %}" style="color:#4f46e5;">Login here</a>
+                </small>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

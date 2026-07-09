@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">🛠️ FixMate AI — Customer Support</h5>
+        </div>
+        <div class="card-body">
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Your Question</label>
+                    <textarea name="question" class="form-control" rows="3"
+                        placeholder="e.g. switch is getting shocked what to do" required>{{ question|default:"" }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Request ID <span class="text-muted">(optional)</span></label>
+                    <input type="text" name="request_id" class="form-control" placeholder="e.g. 12">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Ask FixMate AI</button>
+            </form>
+
+            {% if answer %}
+            <div class="alert alert-light border mt-4">
+                <h6 class="fw-bold">Response:</h6>
+                <div>{{ answer|safe }}</div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+

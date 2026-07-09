@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - FieldCRM{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Welcome back!{% endblock %}
+
+{% block content %}
+
+<!-- Welcome Banner -->
+<div class="rounded-4 mb-4 p-4 p-md-5 text-white" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h3 class="fw-800 mb-1">Welcome back, {{ request.user.get_full_name|default:request.user.username }} 👋</h3>
+            <p class="mb-0" style="opacity:0.9;">Here's what's happening with your team today.</p>
+        </div>
+        <div class="d-none d-md-block">
+            <i class="bi bi-graph-up-arrow" style="font-size:56px;opacity:0.25;"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+
+    <div class="col-xl-4 col-md-6">
+        <div class="stats-card h-100" style="border-left:4px solid #4f46e5;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <p class="text-muted mb-1" style="font-size:12px;font-weight:700;letter-spacing:0.5px;">TOTAL WORKERS</p>
+                    <h2 class="fw-800 mb-1" style="color:#1e1b4b;">{{ total_workers }}</h2>
+                    <small class="text-success"><i class="bi bi-people"></i> Active Field Workers</small>
+                </div>
+                <div style="background:linear-gradient(135deg,#4f46e5,#7c3aed);width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-people-fill text-white fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6">
+        <div class="stats-card h-100" style="border-left:4px solid #f59e0b;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <p class="text-muted mb-1" style="font-size:12px;font-weight:700;letter-spacing:0.5px;">TOTAL VISITS</p>
+                    <h2 class="fw-800 mb-1" style="color:#1e1b4b;">{{ total_visits }}</h2>
+                    <small class="text-primary"><i class="bi bi-briefcase"></i> All Service Visits</small>
+                </div>
+                <div style="background:linear-gradient(135deg,#f59e0b,#d97706);width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-briefcase-fill text-white fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6">
+        <div class="stats-card h-100" style="border-left:4px solid #ef4444;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <p class="text-muted mb-1" style="font-size:12px;font-weight:700;letter-spacing:0.5px;">PENDING REQUESTS</p>
+                    <h2 class="fw-800 mb-1" style="color:#ef4444;">{{ pending_requests_count }}</h2>
+                    <small class="text-danger"><i class="bi bi-hourglass-split"></i> Awaiting Assignment</small>
+                </div>
+                <div style="background:linear-gradient(135deg,#ef4444,#dc2626);width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-hourglass-split text-white fs-4"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Pending Service Requests -->
+{% if pending_requests %}
+<div class="card border-0 mb-4" style="box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+    <div class="card-header bg-white border-0 pt-4 pb-0 px-4 d-flex justify-content-between align-items-center">
+        <h5 class="fw-700 mb-0">
+            <i class="bi bi-hourglass-split text-danger"></i> Pending Service Requests
+            <span class="badge bg-danger ms-2">{{ pending_requests_count }}</span>
+        </h5>
+        <a href="{% url 'visits:pending_requests' %}" class="btn btn-sm btn-outline-danger">View All & Assign</a>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Problem</th>
+                        <th>Address</th>
+                        <th>Requested</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for visit in pending_requests %}
+                    <tr>
+                        <td><strong>{{ visit.customer_name }}</strong></td>
+                        <td>{{ visit.problem_description|truncatewords:8 }}</td>
+                        <td>{{ visit.site_address|default:"—" }}</td>
+                        <td>{{ visit.requested_at|date:"d M, h:i A" }}</td>
+                        <td>
+                            <a href="{% url 'visits:pending_requests' %}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-person-check"></i> Assign
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Quick Actions -->
+<div class="card border-0" style="box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+    <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+        <h5 class="fw-700 mb-0"><i class="bi bi-lightning-charge-fill text-warning"></i> Quick Actions</h5>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="row g-3">
+            <div class="col-md-3 col-6">
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary w-100 py-3 d-flex flex-column align-items-center gap-2">
+                    <i class="bi bi-person-plus-fill fs-4"></i>
+                    <span style="font-size:13px;">Add New Worker</span>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="{% url 'visits:pending_requests' %}" class="btn btn-outline-danger w-100 py-3 d-flex flex-column align-items-center gap-2">
+                    <i class="bi bi-hourglass-split fs-4"></i>
+                    <span style="font-size:13px;">Pending Requests</span>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="{% url 'accounts:user_list' %}" class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center gap-2">
+                    <i class="bi bi-people fs-4"></i>
+                    <span style="font-size:13px;">View All Workers</span>
+                </a>
+            </div>
+            <div class="col-md-3 col-6">
+                <a href="/admin/" class="btn btn-outline-dark w-100 py-3 d-flex flex-column align-items-center gap-2">
+                    <i class="bi bi-gear-fill fs-4"></i>
+                    <span style="font-size:13px;">Admin Panel</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

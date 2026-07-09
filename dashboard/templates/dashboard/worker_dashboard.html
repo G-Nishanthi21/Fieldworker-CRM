@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title %}My Dashboard{% endblock %}
+{% block page_title %}Welcome, {{ request.user.get_full_name }}! 👋{% endblock %}
+{% block page_subtitle %}Your personal workspace{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stats-card text-center">
+            <h3 class="fw-800 mb-0" style="color:#4f46e5;">{{ total_visits }}</h3>
+            <small class="text-muted">Total Visits</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stats-card text-center">
+            <h3 class="fw-800 mb-0" style="color:#10b981;">{{ completed_visits }}</h3>
+            <small class="text-muted">Completed</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stats-card text-center">
+            <h3 class="fw-800 mb-0" style="color:#f59e0b;">{{ pending_tasks }}</h3>
+            <small class="text-muted">Pending Tasks</small>
+        </div>
+    </div>
+</div>
+
+{% if today_attendance %}
+<div class="alert alert-success">
+    ✅ Checked in today at {{ today_attendance.check_in_time }}
+</div>
+{% else %}
+<div class="alert alert-warning">
+    ⚠️ Not checked in today!
+    <a href="{% url 'attendance:check_in' %}" class="btn btn-sm btn-warning ms-2">Check In Now</a>
+</div>
+{% endif %}
+
+<div class="row g-4 mt-2">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="fw-700 mb-3">My Assigned Visits</h6>
+                {% for visit in my_visits %}
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div>
+                        <strong>{{ visit.customer_name }}</strong> <span class="text-muted small">(ID: {{ visit.customer_id }})</span><br>
+                        <small class="text-muted">{{ visit.site_address }}</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge {% if visit.status == 'completed' or visit.status == 'approved' %}bg-success{% elif visit.status == 'started' %}bg-primary{% elif visit.status == 'assigned' %}bg-warning text-dark{% elif visit.status == 'rejected' %}bg-danger{% else %}bg-secondary{% endif %}">
+                            {{ visit.get_status_display }}
+                        </span>
+                        <a href="{% url 'visits:detail' visit.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center py-3">No visits assigned yet.</p>
+                {% endfor %}
+                <a href="{% url 'visits:list' %}" class="btn btn-sm btn-outline-primary mt-3">View All</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="fw-700 mb-3">My Pending Tasks</h6>
+
+                {% for visit in my_rejected_visits %}
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div>
+                        <strong>{{ visit.customer_name }}</strong> <span class="text-muted small">(ID: {{ visit.customer_id }})</span><br>
+                        <small class="text-danger">Rejected — waiting for reassignment</small>
+                    </div>
+                    <a href="{% url 'visits:detail' visit.pk %}" class="btn btn-sm btn-outline-danger">View</a>
+                </div>
+                {% endfor %}
+
+                {% for task in my_tasks %}
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div>
+                        <strong>{{ task.title }}</strong><br>
+                        <small class="text-muted">Due: {{ task.due_date|default:"No due date" }}</small>
+                    </div>
+                    <span class="badge bg-{% if task.priority == 'high' %}danger{% elif task.priority == 'medium' %}warning text-dark{% else %}secondary{% endif %}">
+                        {{ task.get_priority_display }}
+                    </span>
+                </div>
+                {% empty %}
+                {% if not my_rejected_visits %}
+                <p class="text-muted text-center py-3">No pending tasks! 🎉</p>
+                {% endif %}
+                {% endfor %}
+
+                <a href="{% url 'tasks:list' %}" class="btn btn-sm btn-outline-primary mt-3">View All</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <h6 class="fw-700 mb-3">Quick Actions</h6>
+    <div class="d-flex gap-3 flex-wrap">
+        <a href="{% url 'visits:list' %}" class="btn btn-primary">
+            <i class="bi bi-briefcase"></i> My Visits
+        </a>
+        <a href="{% url 'attendance:check_in' %}" class="btn btn-success">
+            <i class="bi bi-geo-alt"></i> Check In
+        </a>
+        <a href="{% url 'leaves:apply' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-calendar-x"></i> Apply Leave
+        </a>
+    </div>
+</div>
+{% endblock %}

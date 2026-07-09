@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% block title %}Visit Detail{% endblock %}
+{% block page_title %}Visit: {{ visit.customer_name }}{% endblock %}
+{% block page_subtitle %}{{ visit.site_address }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <h6 class="fw-700 text-muted mb-3">VISIT DETAILS</h6>
+                <p><strong>Customer:</strong> {{ visit.customer_name }}</p>
+                <p><strong>Customer ID:</strong> {{ visit.customer.id|default:"—" }}</p>
+                <p><strong>Phone:</strong> {{ visit.customer_phone|default:"—" }}</p>
+                <p><strong>Site:</strong> {{ visit.site_address|default:"—" }}</p>
+                <p><strong>Problem:</strong> {{ visit.problem_description|default:"—" }}</p>
+                <p><strong>Worker:</strong>
+                    {% if visit.worker %}{{ visit.worker.get_full_name|default:visit.worker.username }}
+                    {% else %}Not assigned yet{% endif %}
+                </p>
+                {% if visit.started_at %}
+                    <p><strong>Started:</strong> {{ visit.started_at|date:"d M Y, h:i A" }}</p>
+                {% endif %}
+                {% if visit.completed_at %}
+                    <p><strong>Completed:</strong> {{ visit.completed_at|date:"d M Y, h:i A" }}</p>
+                {% endif %}
+                {% if visit.work_description %}
+                    <p><strong>Work Done:</strong> {{ visit.work_description }}</p>
+                {% endif %}
+
+                <p><strong>Status:</strong>
+                    {% if visit.status == 'pending' %}
+                        <span class="badge bg-secondary">Pending Assignment</span>
+                    {% elif visit.status == 'assigned' %}
+                        <span class="badge bg-warning text-dark">Assigned</span>
+                    {% elif visit.status == 'started' %}
+                        <span class="badge bg-primary">In Progress</span>
+                    {% elif visit.status == 'approved' %}
+                        <span class="badge bg-success">Approved by Customer</span>
+                    {% elif visit.status == 'completed' %}
+                        <span class="badge bg-info text-dark">Completed — Awaiting Approval</span>
+                    {% elif visit.status == 'rejected' %}
+                        <span class="badge bg-danger">Rejected</span>
+                    {% endif %}
+                </p>
+
+                {% if visit.customer_rating %}
+                <p><strong>Customer Rating:</strong>
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= visit.customer_rating %}
+                            <i class="bi bi-star-fill text-warning"></i>
+                        {% else %}
+                            <i class="bi bi-star text-muted"></i>
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                {% endif %}
+
+                {% if visit.customer_feedback %}
+                <p><strong>Customer Feedback:</strong> {{ visit.customer_feedback }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                <h6 class="fw-700 text-muted mb-3">PHOTOS & ACTIONS</h6>
+
+                <div class="row g-3 mb-4">
+                    {% if visit.before_photo %}
+                    <div class="col-6">
+                        <p class="text-muted mb-1" style="font-size:12px;">Before</p>
+                        <img src="{{ visit.before_photo.url }}" class="img-fluid rounded" style="max-height:180px;object-fit:cover;width:100%;">
+                    </div>
+                    {% endif %}
+                    {% if visit.after_photo %}
+                    <div class="col-6">
+                        <p class="text-muted mb-1" style="font-size:12px;">After</p>
+                        <img src="{{ visit.after_photo.url }}" class="img-fluid rounded" style="max-height:180px;object-fit:cover;width:100%;">
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Worker: Start Visit -->
+                {% if request.user.is_field_worker and visit.status == 'assigned' and visit.worker == request.user %}
+                <form method="post" action="{% url 'visits:start' visit.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary w-100 mb-3">
+                        <i class="bi bi-play-fill"></i> Start Work
+                    </button>
+                </form>
+                {% endif %}
+
+                <!-- Worker: Complete Visit -->
+                {% if request.user.is_field_worker and visit.status == 'started' and visit.worker == request.user %}
+                <form method="post" action="{% url 'visits:complete' visit.pk %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-600">Work Description</label>
+                        <textarea name="work_description" class="form-control" rows="2" placeholder="What was done..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-600">After Photo</label>
+                        <input type="file" name="after_photo" class="form-control" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-check-circle"></i> Mark as Completed
+                    </button>
+                </form>
+                {% endif %}
+
+                <!-- Customer: Approve / Reject -->
+                {% if request.user.is_customer_role and visit.status == 'completed' %}
+                <form method="post" action="{% url 'visits:customer_approval' visit.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-600">Your Feedback</label>
+                        <textarea name="feedback" class="form-control" rows="2" placeholder="Share your experience..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-600">Rating</label>
+                        <select name="rating" class="form-select">
+                            <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                            <option value="4">⭐⭐⭐⭐ Good</option>
+                            <option value="3">⭐⭐⭐ Average</option>
+                            <option value="2">⭐⭐ Poor</option>
+                            <option value="1">⭐ Very Poor</option>
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" name="action" value="approve" class="btn btn-success flex-fill">
+                            <i class="bi bi-hand-thumbs-up"></i> Approve
+                        </button>
+                        <button type="submit" name="action" value="reject" class="btn btn-danger flex-fill">
+                            <i class="bi bi-hand-thumbs-down"></i> Reject
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
+
+                <!-- Customer: Add Comment -->
+                {% if request.user.is_customer_role and visit.customer == request.user %}
+                <div class="mt-4">
+                    <h6 class="fw-700 text-muted mb-3">ADD A COMMENT</h6>
+                    <form method="post" action="{% url 'visits:add_comment' visit.pk %}">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            <textarea name="comment" class="form-control" rows="2"
+                                      placeholder="Write a comment..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-chat-dots"></i> Post Comment
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Comments Section -->
+{% if visit.comments.all %}
+<div class="card mt-4">
+    <div class="card-body p-4">
+        <h6 class="fw-700 text-muted mb-3">COMMENTS</h6>
+        {% for comment in visit.comments.all %}
+        <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
+            <div style="width:36px;height:36px;background:#4f46e5;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="bi bi-person-fill text-white" style="font-size:14px;"></i>
+            </div>
+            <div>
+                <strong style="font-size:14px;">{{ comment.author.get_full_name|default:comment.author.username }}</strong>
+                <small class="text-muted ms-2">{{ comment.created_at|date:"d M, h:i A" }}</small>
+                <p class="mb-0 mt-1" style="font-size:14px;">{{ comment.text }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="mt-3">
+    <a href="{% url 'visits:list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Visits
+    </a>
+</div>
+
+{% endblock %}

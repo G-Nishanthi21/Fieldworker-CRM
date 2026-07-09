@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Worker - FieldCRM{% endblock %}
+{% block page_title %}Add New Worker{% endblock %}
+{% block page_subtitle %}Create a new user account{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-body p-4">
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Please fix the following errors:</strong>
+            <ul class="mb-0">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">First Name</label>
+                    <input type="text" name="first_name" class="form-control" placeholder="First Name" value="{{ request.POST.first_name }}" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" name="last_name" class="form-control" placeholder="Last Name" value="{{ request.POST.last_name }}" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" placeholder="Username" value="{{ request.POST.username }}" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="Email Address" value="{{ request.POST.email }}" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" name="phone_number" class="form-control" placeholder="Phone Number" value="{{ request.POST.phone_number }}" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Role</label>
+                    <select name="role" class="form-select" required>
+                        <option value="">Select Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="manager">Manager</option>
+                        <option value="field_worker">Field Worker</option>
+                        <option value="customer">Customer</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Department (Optional)</label>
+                    <input type="text" name="department" class="form-control" placeholder="Department" value="{{ request.POST.department }}">
+                </div>
+
+                <div class="col-md-6"></div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password1" class="form-control" placeholder="Password" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" name="password2" class="form-control" placeholder="Confirm Password" required>
+                </div>
+
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    Create Worker
+                </button>
+                <a href="{% url 'dashboard:home' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

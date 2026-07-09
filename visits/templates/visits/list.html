@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Visits - FieldCRM{% endblock %}
+{% block page_title %}Visits{% endblock %}
+{% block page_subtitle %}
+    {% if user.is_customer_role %}Your service requests{% else %}Assigned and completed visits{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body px-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        {% if user.is_admin or user.is_manager %}<th>Customer</th><th>Worker</th>{% endif %}
+                        {% if user.is_field_worker %}<th>Customer</th>{% endif %}
+                        {% if user.is_customer_role %}<th>Worker</th>{% endif %}
+                        <th>Problem</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for visit in visits %}
+                    <tr>
+                        {% if user.is_admin or user.is_manager %}
+                            <td>{{ visit.customer_name }}</td>
+                            <td>{% if visit.worker %}{{ visit.worker.get_full_name|default:visit.worker.username }}{% else %}—{% endif %}</td>
+                        {% endif %}
+                        {% if user.is_field_worker %}
+                            <td>{{ visit.customer_name }}</td>
+                        {% endif %}
+                        {% if user.is_customer_role %}
+                            <td>{% if visit.worker %}{{ visit.worker.get_full_name|default:visit.worker.username }}{% else %}Not assigned yet{% endif %}</td>
+                        {% endif %}
+                        <td>{{ visit.problem_description|default:"—"|truncatewords:8 }}</td>
+                        <td>
+                            {% if visit.status == 'pending' %}
+                                <span class="badge bg-secondary">Pending</span>
+                            {% elif visit.status == 'assigned' %}
+                                <span class="badge bg-warning text-dark">Assigned</span>
+                            {% elif visit.status == 'started' %}
+                                <span class="badge bg-primary">In Progress</span>
+                            {% elif visit.status == 'completed' %}
+                                <span class="badge bg-info text-dark">Awaiting Approval</span>
+                            {% elif visit.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif visit.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'visits:detail' visit.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No visits yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
