@@ -18,9 +18,7 @@ SECRET_KEY = 'django-insecure-5x=956sy&sp77=y-*valmot$d35)iv_6)%)&66#q*6r-3f=%9f
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "fieldworker-crm-3.onrender.com",
+    "*"
 ]
 
 
