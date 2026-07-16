@@ -20,7 +20,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "fieldworker-crm-2.onrender.com",
+    "fieldworker-crm-3.onrender.com",
 ]
 
 
