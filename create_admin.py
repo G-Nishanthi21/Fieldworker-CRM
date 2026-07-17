@@ -4,14 +4,19 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "field_worker.settings")
 django.setup()
 
-from accounts.models import User
+from accounts.models import User, UserRole
 
-if not User.objects.filter(username="admin").exists():
-    User.objects.create_superuser(
-        username="admin",
-        email="admin@gmail.com",
-        password="Admin@12345"
-    )
-    print("Admin created")
-else:
-    print("Admin already exists")
+user, created = User.objects.get_or_create(
+    username="admin",
+    defaults={
+        "email": "admin@gmail.com",
+    }
+)
+
+user.set_password("Admin@12345")
+user.is_superuser = True
+user.is_staff = True
+user.role = UserRole.ADMIN
+user.save()
+
+print("Admin ready with ADMIN role")
