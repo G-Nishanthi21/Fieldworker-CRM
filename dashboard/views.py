@@ -18,7 +18,7 @@ class DashboardHomeView(View):
         user = request.user
 
         # Admin / Manager Dashboard
-        if user.is_admin or user.is_manager:
+        if user.role == "admin" or user.role == "manager":
             today = timezone.now().date()
 
             total_workers = User.objects.filter(role='field_worker').count()
